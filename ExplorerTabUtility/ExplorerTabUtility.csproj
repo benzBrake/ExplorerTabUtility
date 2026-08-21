@@ -15,7 +15,6 @@
         <Copyright>Copyright © 2025 w4po</Copyright>
         <PackageProjectUrl>https://github.com/w4po/ExplorerTabUtility</PackageProjectUrl>
         <RepositoryUrl>https://github.com/w4po/ExplorerTabUtility</RepositoryUrl>
-        <SatelliteResourceLanguages>none</SatelliteResourceLanguages>
         <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     </PropertyGroup>
 

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using ExplorerTabUtility.Models;
 using ExplorerTabUtility.Helpers;
 using H.Hooks;
+using ExplorerTabUtility.Localization;
 
 namespace ExplorerTabUtility.UI.Views;
 
@@ -42,6 +43,7 @@ public partial class HotKeyProfileControl : UserControl
 
         InitializeControls();
         SetupEventHandlers();
+        LocalizationManager.Instance.PropertyChanged += LocalizationChanged;
     }
 
     // Initialize controls with hot key profile data
@@ -88,6 +90,13 @@ public partial class HotKeyProfileControl : UserControl
         CbHandled.Unchecked += CbHandled_CheckedChanged;
         CbOpenAsTab.Checked += CbOpenAsTab_CheckedChanged;
         CbOpenAsTab.Unchecked += CbOpenAsTab_CheckedChanged;
+    }
+
+    private void LocalizationChanged(object? _, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != "Item[]") return;
+        CbScope.Items.Refresh();
+        CbAction.Items.Refresh();
     }
 
     // Event handlers

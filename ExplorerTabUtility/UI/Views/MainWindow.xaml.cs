@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
 using Microsoft.Win32;
@@ -9,6 +10,7 @@ using ExplorerTabUtility.Managers;
 using ExplorerTabUtility.Helpers;
 using ExplorerTabUtility.Models;
 using ExplorerTabUtility.UI.Views.Controls;
+using ExplorerTabUtility.Localization;
 
 namespace ExplorerTabUtility.UI.Views;
 
@@ -41,6 +43,7 @@ public partial class MainWindow : Window
         CbAutoSaveProfiles.IsChecked = SettingsManager.SaveProfilesOnExit;
         CbSaveClosedHistory.IsChecked = SettingsManager.SaveClosedHistory;
         CbRestorePreviousWindows.IsChecked = SettingsManager.RestorePreviousWindows;
+        CbLanguage.SelectedIndex = SettingsManager.Language switch { "en" => 1, "zh-CN" => 2, _ => 0 };
         UpdateTrayIconVisibility(false);
 
         if (SettingsManager.AutoUpdate)
@@ -128,7 +131,7 @@ public partial class MainWindow : Window
         var ofd = new OpenFileDialog
         {
             FileName = Constants.HotKeyProfilesFileName,
-            Filter = Constants.JsonFileFilter
+            Filter = LocalizationManager.Instance["File.JsonFilter"]
         };
 
         if (ofd.ShowDialog() != true) return;
@@ -143,7 +146,7 @@ public partial class MainWindow : Window
         var sfd = new SaveFileDialog
         {
             FileName = Constants.HotKeyProfilesFileName,
-            Filter = Constants.JsonFileFilter
+            Filter = LocalizationManager.Instance["File.JsonFilter"]
         };
 
         if (sfd.ShowDialog() != true) return;
@@ -187,6 +190,12 @@ public partial class MainWindow : Window
 
     private void CbHideTrayIcon_CheckedChanged(object? _, RoutedEventArgs __) => UpdateTrayIconVisibility(true);
 
+    private void CbLanguage_SelectionChanged(object? _, SelectionChangedEventArgs __)
+    {
+        if (CbLanguage.SelectedItem is ComboBoxItem { Tag: string language })
+            LocalizationManager.Instance.SetLanguage(language);
+    }
+
     private void UpdateTrayIconVisibility(bool showAlert)
     {
         // Check for valid toggle visibility profile
@@ -201,10 +210,10 @@ public partial class MainWindow : Window
         if (isChecked && showAlert && !SettingsManager.IsTrayIconHidden)
         {
             var message = canToggleVisibility
-                ? $"You can show the app again by pressing {profile!.HotKeys!.HotKeysToString(profile.IsDoubleClick)}"
-                : "Cannot hide tray icon if no hotkey is configured to toggle visibility.";
+                ? string.Format(LocalizationManager.Instance["Dialog.HideTrayWithHotkey"], profile!.HotKeys!.HotKeysToString(profile.IsDoubleClick))
+                : LocalizationManager.Instance["Dialog.HideTrayNoHotkey"];
 
-            CustomMessageBox.Show(this, message, Constants.AppName);
+            CustomMessageBox.Show(this, message, LocalizationManager.Instance["App.Name"]);
         }
 
         var newCheckedState = canToggleVisibility && isChecked;

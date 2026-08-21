@@ -3,6 +3,7 @@ using System.Threading;
 using System.Windows.Controls;
 using ExplorerTabUtility.UI.Views;
 using ExplorerTabUtility.Helpers;
+using ExplorerTabUtility.Localization;
 
 namespace ExplorerTabUtility;
 
@@ -17,6 +18,7 @@ public partial class App : Application
 
         if (createdNew)
         {
+            LocalizationManager.Instance.Initialize();
             base.OnStartup(e);
             SetupTooltipBehavior();
 
@@ -24,10 +26,7 @@ public partial class App : Application
             return;
         }
 
-        CustomMessageBox.Show("""
-                              Another instance is already running.
-                              Check in System Tray Icons.
-                              """, Constants.AppName, icon: MessageBoxImage.Information);
+        CustomMessageBox.Show(LocalizationManager.Instance["Dialog.AnotherInstance"], LocalizationManager.Instance["App.Name"], icon: MessageBoxImage.Information);
         Shutdown();
     }
 

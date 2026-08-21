@@ -8,6 +8,7 @@ using ExplorerTabUtility.Models;
 using ExplorerTabUtility.Helpers;
 using ExplorerTabUtility.Managers;
 using ExplorerTabUtility.UI.Commands;
+using ExplorerTabUtility.Localization;
 
 namespace ExplorerTabUtility.UI.Views.Controls;
 
@@ -26,7 +27,7 @@ public partial class SystemTrayIcon : UserControl, IDisposable
         InitializeCommands();
 
         TrayIcon.Icon = Helper.GetIcon();
-        TrayIcon.ToolTipText = Constants.NotifyIconText;
+        TrayIcon.ToolTipText = LocalizationManager.Instance["App.Tooltip"];
 
         _profileManager = profileManager;
         _hookManager = hookManager;
@@ -35,6 +36,11 @@ public partial class SystemTrayIcon : UserControl, IDisposable
         _hookManager.OnShellInitialized += HookManager_OnShellInitialized;
         _hookManager.OnWindowHookToggled += HookManager_OnWindowHookToggled;
         _hookManager.OnReuseTabsToggled += HookManager_OnReuseTabsToggled;
+        LocalizationManager.Instance.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == "Item[]")
+                TrayIcon.ToolTipText = LocalizationManager.Instance["App.Tooltip"];
+        };
 
         // Populate submenus for keyboard & mouse profiles
         UpdateMenuItems(autoCheckParent: false);
