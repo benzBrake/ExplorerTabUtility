@@ -10,6 +10,8 @@ namespace ExplorerTabUtility.Localization;
 public sealed class LocalizationManager : INotifyPropertyChanged
 {
     private static readonly ResourceManager ResourceManager = new("ExplorerTabUtility.Resources.Strings", typeof(LocalizationManager).Assembly);
+    // Keep the system UI culture before manual language selection changes the current thread culture.
+    private static readonly CultureInfo SystemUiCulture = CultureInfo.CurrentUICulture;
     public static LocalizationManager Instance { get; } = new();
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -22,7 +24,7 @@ public sealed class LocalizationManager : INotifyPropertyChanged
     public void SetLanguage(string language, bool persist = true)
     {
         var normalized = language is "en" or "zh-CN" ? language : "auto";
-        var culture = normalized == "auto" ? CultureInfo.CurrentUICulture : CultureInfo.GetCultureInfo(normalized);
+        var culture = normalized == "auto" ? SystemUiCulture : CultureInfo.GetCultureInfo(normalized);
         Culture = culture.Name.StartsWith("zh", StringComparison.OrdinalIgnoreCase)
             ? CultureInfo.GetCultureInfo("zh-CN")
             : CultureInfo.GetCultureInfo("en");
