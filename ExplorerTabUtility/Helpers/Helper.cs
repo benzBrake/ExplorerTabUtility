@@ -423,10 +423,14 @@ public static class Helper
                 cacheRequest.Pop();
             }
 
-            var selectedIndex = tabItems.FindIndex(static tab => tab.Cached.IsSelected);
-            var targetIndex = selectedIndex + direction;
-            if (selectedIndex < 0 || targetIndex < 0 || targetIndex >= tabItems.Count)
+            if (tabItems.Count < 2)
                 return false;
+
+            var selectedIndex = tabItems.FindIndex(static tab => tab.Cached.IsSelected);
+            if (selectedIndex < 0)
+                return false;
+
+            var targetIndex = (selectedIndex + direction + tabItems.Count) % tabItems.Count;
 
             tabItems[targetIndex].Select();
             return true;
