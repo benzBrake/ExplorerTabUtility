@@ -16,6 +16,7 @@ public class HotKeyProfile
     public bool IsEnabled { get; set; } = true;
     public bool IsAsTab { get; set; } = true;
     public bool IsMouse { get; set; }
+    public Key[]? SimulatedKeys { get; set; }
     public bool IsDoubleClick { get; set; }
     public MouseWheelDirection MouseWheelDirection { get; set; }
     public int Delay { get; set; }
@@ -45,6 +46,7 @@ public class HotKeyProfile
             IsEnabled = IsEnabled,
             IsAsTab = IsAsTab,
             IsMouse = IsMouse,
+            SimulatedKeys = SimulatedKeys?.ToArray(),
             IsDoubleClick = IsDoubleClick,
             MouseWheelDirection = MouseWheelDirection,
             Delay = Delay

@@ -16,4 +16,7 @@
   <data name="About.OriginalProject" xml:space="preserve"><value>原始项目：w4po/ExplorerTabUtility</value></data>
   <data name="About.OriginalProjectTip" xml:space="preserve"><value>在 GitHub 上打开原始项目</value></data>
   <data name="About.Developers" xml:space="preserve"><value>开发者</value></data>
+  <data name="Profile.SimulatedKeys" xml:space="preserve"><value>模拟按键</value></data>
+  <data name="Profile.SimulatedKeysTip" xml:space="preserve"><value>触发此鼠标快捷键时发送的键盘组合键。</value></data>
+  <data name="Enum.HotKeyAction.SimulateKey" xml:space="preserve"><value>模拟按键</value></data>
 </root>

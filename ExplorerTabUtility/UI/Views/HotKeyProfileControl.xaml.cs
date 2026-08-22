@@ -54,6 +54,8 @@ public partial class HotKeyProfileControl : UserControl
 
         if (_profile.HotKeys != null)
             TxtHotKeys.Text = _profile.HotKeys.HotKeysToString(_profile.IsDoubleClick, _profile.MouseWheelDirection);
+        if (_profile.SimulatedKeys != null)
+            TxtSimulatedKeys.Text = _profile.SimulatedKeys.HotKeysToString();
 
         // Setup ComboBoxes
         CbScope.ItemsSource = Enum.GetValues(typeof(HotkeyScope));
@@ -79,6 +81,9 @@ public partial class HotKeyProfileControl : UserControl
         TxtHotKeys.GotFocus += TxtHotKeys_Enter;
         TxtHotKeys.LostFocus += TxtHotKeys_Leave;
         TxtHotKeys.PreviewKeyDown += TxtHotKeys_KeyDown;
+        TxtSimulatedKeys.GotFocus += TxtSimulatedKeys_Enter;
+        TxtSimulatedKeys.LostFocus += TxtSimulatedKeys_Leave;
+        TxtSimulatedKeys.PreviewKeyDown += TxtHotKeys_KeyDown;
         CbScope.SelectionChanged += CbScope_SelectedIndexChanged;
         CbAction.SelectionChanged += CbAction_SelectedIndexChanged;
         BtnDelete.Click += BtnDelete_Click;
@@ -99,6 +104,8 @@ public partial class HotKeyProfileControl : UserControl
         CbAction.Items.Refresh();
         if (_profile.HotKeys != null)
             TxtHotKeys.Text = _profile.HotKeys.HotKeysToString(_profile.IsDoubleClick, _profile.MouseWheelDirection);
+        if (_profile.SimulatedKeys != null)
+            TxtSimulatedKeys.Text = _profile.SimulatedKeys.HotKeysToString();
     }
 
     // Event handlers
@@ -127,6 +134,16 @@ public partial class HotKeyProfileControl : UserControl
         // If the name is empty, set it to the hotkey.
         if (string.IsNullOrWhiteSpace(TxtName.Text))
             TxtName.Text = TxtHotKeys.Text;
+    }
+
+    private void TxtSimulatedKeys_Enter(object _, RoutedEventArgs __)
+    {
+        InitializeSimulatedKeybindingHook();
+    }
+
+    private void TxtSimulatedKeys_Leave(object _, RoutedEventArgs __)
+    {
+        DisposeKeybindingHooks();
     }
 
     private void LowLevelHook_Down(object? _, KeyboardEventArgs e)
@@ -182,7 +199,12 @@ public partial class HotKeyProfileControl : UserControl
         _profile.IsDoubleClick = isDoubleClick;
 
         _profile.MouseWheelDirection = MouseWheelDirection.None;
-        Dispatcher.Invoke(() => TxtHotKeys.Text = keys.HotKeysToString(isDoubleClick));
+        Dispatcher.Invoke(() =>
+        {
+            TxtHotKeys.Text = keys.HotKeysToString(isDoubleClick);
+            UpdateActionComboBox();
+            UpdateControlsEnabledState();
+        });
     }
 
     private void LowLevelHook_Wheel(object? _, MouseEventArgs e)
@@ -206,7 +228,46 @@ public partial class HotKeyProfileControl : UserControl
         _profile.IsMouse = true;
         _profile.IsDoubleClick = false;
         _profile.MouseWheelDirection = direction;
-        Dispatcher.Invoke(() => TxtHotKeys.Text = keys.HotKeysToString(false, direction));
+        Dispatcher.Invoke(() =>
+        {
+            TxtHotKeys.Text = keys.HotKeysToString(false, direction);
+            UpdateActionComboBox();
+            UpdateControlsEnabledState();
+        });
+    }
+
+    private void LowLevelHook_SimulatedKeyDown(object? _, KeyboardEventArgs e)
+    {
+        if (e.Keys.Are(Key.Back))
+        {
+            e.IsHandled = true;
+            _profile.SimulatedKeys = null;
+            Dispatcher.Invoke(() => TxtSimulatedKeys.Text = string.Empty);
+            return;
+        }
+
+        if (e.Keys.Are(Key.Tab))
+        {
+            e.IsHandled = true;
+            MoveFocus(System.Windows.Input.FocusNavigationDirection.Right);
+            return;
+        }
+
+        if (e.Keys.Are(Key.Shift, Key.Tab))
+        {
+            e.IsHandled = true;
+            MoveFocus(System.Windows.Input.FocusNavigationDirection.Left);
+            return;
+        }
+
+        e.IsHandled = true;
+        var keys = e.Keys.Values
+            .OrderBy(key => !IsModifierKey(key))
+            .ThenBy(key => key)
+            .ToArray();
+
+        _profile.SimulatedKeys = keys;
+        Dispatcher.Invoke(() => TxtSimulatedKeys.Text = keys.HotKeysToString());
     }
 
     private void MoveFocus(System.Windows.Input.FocusNavigationDirection? direction)
@@ -249,6 +310,8 @@ public partial class HotKeyProfileControl : UserControl
         return false;
     }
 
+    private static bool IsModifierKey(Key key) => key is Key.Ctrl or Key.Alt or Key.Shift or Key.LWin or Key.RWin;
+
     private bool IsMouseOverHotkeyTextBox()
     {
         return Dispatcher.Invoke(() =>
@@ -276,9 +339,11 @@ public partial class HotKeyProfileControl : UserControl
     private void UpdateActionComboBox()
     {
         var allowedActions = GetAllowedActions(_profile.Scope);
+        if (_profile.IsMouse)
+            allowedActions = allowedActions.Append(HotKeyAction.SimulateKey).Distinct().ToArray();
 
         // Preserve the current action if it's allowed, otherwise use the first allowed action
-        var currentAction = (HotKeyAction)(CbAction.SelectedItem ?? 0);
+        var currentAction = _profile.Action;
         var desiredAction = allowedActions.Contains(currentAction)
             ? currentAction
             : allowedActions.FirstOrDefault();
@@ -299,8 +364,12 @@ public partial class HotKeyProfileControl : UserControl
         CbScope.IsEnabled = isEnabled;
         CbAction.IsEnabled = isEnabled;
         TxtPath.IsEnabled = isEnabled && _profile.Action == HotKeyAction.Open;
+        PathPanel.Visibility = _profile.Action == HotKeyAction.Open ? Visibility.Visible : Visibility.Collapsed;
         NDelay.IsEnabled = isEnabled;
         CbHandled.IsEnabled = isEnabled;
+        var canSimulateKeys = _profile.IsMouse && _profile.Action == HotKeyAction.SimulateKey;
+        TxtSimulatedKeys.IsEnabled = isEnabled && canSimulateKeys;
+        TxtSimulatedKeys.Visibility = canSimulateKeys ? Visibility.Visible : Visibility.Collapsed;
         CbOpenAsTab.IsEnabled = isEnabled && _profile.Action is
             HotKeyAction.Open or HotKeyAction.Duplicate or HotKeyAction.ReopenClosed;
     }
@@ -309,21 +378,16 @@ public partial class HotKeyProfileControl : UserControl
     {
         var selectedAction = (HotKeyAction)(CbAction.SelectedItem ?? 0);
         _profile.Action = selectedAction;
+        UpdateControlsEnabledState();
         switch (selectedAction)
         {
             case HotKeyAction.Open:
-                TxtPath.IsEnabled = CbEnabled.IsChecked ?? false;
-                CbOpenAsTab.IsEnabled = CbEnabled.IsChecked ?? false;
                 TxtPath.Text = _profile.Path ?? string.Empty;
                 break;
             case HotKeyAction.Duplicate:
             case HotKeyAction.ReopenClosed:
-                TxtPath.IsEnabled = false;
-                CbOpenAsTab.IsEnabled = CbEnabled.IsChecked ?? false;
                 break;
             default:
-                TxtPath.IsEnabled = false;
-                CbOpenAsTab.IsEnabled = false;
                 break;
         }
         
@@ -383,6 +447,16 @@ public partial class HotKeyProfileControl : UserControl
         _lowLevelMouseHook.Down += LowLevelHook_Down;
         _lowLevelMouseHook.Wheel += LowLevelHook_Wheel;
         _lowLevelMouseHook.Start();
+    }
+
+    private void InitializeSimulatedKeybindingHook()
+    {
+        DisposeKeybindingHooks(false);
+        _keybindingHookStarted?.Invoke();
+
+        _lowLevelKeyboardHook = new LowLevelKeyboardHook { Handling = true };
+        _lowLevelKeyboardHook.Down += LowLevelHook_SimulatedKeyDown;
+        _lowLevelKeyboardHook.Start();
     }
 
     private void DisposeKeybindingHooks(bool inform = true)

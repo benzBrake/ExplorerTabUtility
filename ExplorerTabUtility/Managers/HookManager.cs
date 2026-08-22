@@ -50,6 +50,11 @@ public sealed class HookManager
     {
         switch (e.Profile.Action)
         {
+            case HotKeyAction.SimulateKey:
+                if (e.Profile.IsMouse && e.Profile.SimulatedKeys is { Length: > 0 })
+                    KeyboardSimulator.SendKeyStroke(e.Profile.SimulatedKeys);
+                break;
+
             case HotKeyAction.Open:
                 await _windowHook.Open(e.Profile.Path, e.Profile.IsAsTab, e.ForegroundWindow, e.Profile.Delay);
                 break;

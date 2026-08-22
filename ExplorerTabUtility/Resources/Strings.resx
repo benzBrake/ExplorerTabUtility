@@ -30,4 +30,7 @@
   <data name="About.OriginalProject" xml:space="preserve"><value>Original project: w4po/ExplorerTabUtility</value></data>
   <data name="About.OriginalProjectTip" xml:space="preserve"><value>Open the original project on GitHub</value></data>
   <data name="About.Developers" xml:space="preserve"><value>Developers</value></data>
+  <data name="Profile.SimulatedKeys" xml:space="preserve"><value>Simulated keys</value></data>
+  <data name="Profile.SimulatedKeysTip" xml:space="preserve"><value>Keyboard shortcut to send when this mouse shortcut is triggered.</value></data>
+  <data name="Enum.HotKeyAction.SimulateKey" xml:space="preserve"><value>Simulate key</value></data>
 </root>

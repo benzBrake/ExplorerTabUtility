@@ -51,7 +51,9 @@ public sealed class Mouse : IHook
             if (!e.Keys.Are(profile.HotKeys)) continue;
 
             if (!Helper.MatchesHotkeyScope(profile.Scope, e.Position, out var handle)) continue;
-            
+
+            e.IsHandled = profile.IsHandled;
+
             // Queue the hotkey trigger in a separate thread.
 #if NET7_0_OR_GREATER
             ThreadPool.QueueUserWorkItem(static s => s.Handler.Invoke(new HotKeyEventArgs(s.Profile, s.Handle, s.Position)),

@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading;
+using H.Hooks;
 using ExplorerTabUtility.WinAPI;
 
 namespace ExplorerTabUtility.Helpers;
@@ -11,6 +12,7 @@ namespace ExplorerTabUtility.Helpers;
 public static class KeyboardSimulator
 {
     private static int _sendingTabShortcut;
+    private static int _sendingKeyStroke;
     private static int _suppressTabShortcutUntil;
 
     public static readonly VirtualKey[] ModifierKeys =
@@ -25,7 +27,8 @@ public static class KeyboardSimulator
         VirtualKey.RWin
     ];
 
-    public static bool IsModifierKey(VirtualKey keyCode) => ModifierKeys.Contains(keyCode);
+    public static bool IsModifierKey(VirtualKey keyCode) => keyCode is
+        VirtualKey.Shift or VirtualKey.Control or VirtualKey.Alt || ModifierKeys.Contains(keyCode);
     public static bool IsExtendedKey(VirtualKey keyCode)
     {
         return keyCode
@@ -55,6 +58,7 @@ public static class KeyboardSimulator
     public static bool IsSendingTabShortcut =>
         Volatile.Read(ref _sendingTabShortcut) > 0 ||
         unchecked(Environment.TickCount - Volatile.Read(ref _suppressTabShortcutUntil)) < 0;
+    public static bool IsSendingKeyStroke => Volatile.Read(ref _sendingKeyStroke) > 0;
 
     public static void SendTabShortcut(VirtualKey keyCode, bool withShift)
     {
@@ -210,6 +214,41 @@ public static class KeyboardSimulator
         }
 
         SendInputs(inputs);
+    }
+
+    public static void SendKeyStroke(IEnumerable<Key> keys)
+    {
+        var virtualKeys = keys
+            .Select(key => (VirtualKey)(ushort)key)
+            .Distinct()
+            .ToArray();
+        if (virtualKeys.Length == 0) return;
+
+        var modifierKeys = virtualKeys.Where(IsModifierKey).ToArray();
+        var regularKeys = virtualKeys.Where(key => !IsModifierKey(key)).ToArray();
+        var inputs = new List<INPUT>(2 * virtualKeys.Length);
+
+        foreach (var key in modifierKeys)
+            inputs.AddKeyDown(key);
+
+        foreach (var key in regularKeys)
+            inputs.AddKeyDown(key);
+
+        for (var i = regularKeys.Length - 1; i >= 0; i--)
+            inputs.AddKeyUp(regularKeys[i]);
+
+        for (var i = modifierKeys.Length - 1; i >= 0; i--)
+            inputs.AddKeyUp(modifierKeys[i]);
+
+        Interlocked.Increment(ref _sendingKeyStroke);
+        try
+        {
+            SendInputs(inputs.ToArray());
+        }
+        finally
+        {
+            Interlocked.Decrement(ref _sendingKeyStroke);
+        }
     }
 
     public static List<INPUT> AddUpEventsForCurrentlyPressedModifiers(this List<INPUT> inputs)

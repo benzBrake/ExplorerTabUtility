@@ -44,5 +44,7 @@ public enum HotKeyAction
     [Description("Switch to the next File Explorer tab.")]
     NextTab,
     [Description("Close the current File Explorer tab.")]
-    CloseCurrentTab
+    CloseCurrentTab,
+    [Description("Send a configured keyboard shortcut.")]
+    SimulateKey
 }

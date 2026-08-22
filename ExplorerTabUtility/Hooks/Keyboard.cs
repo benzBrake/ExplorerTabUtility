@@ -27,7 +27,7 @@ public sealed class Keyboard : IHook
     private void LowLevelKeyboardHook_Down(object? sender, KeyboardEventArgs e)
     {
         var handler = OnHotKeyProfileTriggered;
-        if (handler == null || KeyboardSimulator.IsSendingTabShortcut) return;
+        if (handler == null || KeyboardSimulator.IsSendingTabShortcut || KeyboardSimulator.IsSendingKeyStroke) return;
 
         foreach (var profile in _hotkeyProfiles)
         {

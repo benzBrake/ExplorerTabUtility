@@ -81,6 +81,7 @@
                   Visibility="{Binding ElementName=ExpanderToggle, Path=IsChecked, Mode=TwoWay, Converter={StaticResource BoolToVis}}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
@@ -88,7 +89,7 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Path -->
-                <Grid Grid.Column="0">
+                <Grid x:Name="PathPanel" Grid.Column="0" Grid.ColumnSpan="2">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
@@ -108,8 +109,13 @@
                     </Path>
                 </Grid>
 
+                <!-- Simulated keyboard shortcut (shown for the Simulate key action only) -->
+                <TextBox Grid.Column="0" Grid.ColumnSpan="2" x:Name="TxtSimulatedKeys" Tag="{loc:Loc Profile.SimulatedKeys}"
+                         Style="{StaticResource CustomTextBoxStyle}" Visibility="Collapsed"
+                         ToolTip="{loc:Loc Profile.SimulatedKeysTip}" />
+
                 <!-- Delay -->
-                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="6"
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="6"
                             ToolTip="{loc:Loc Profile.DelayTip}">
                     <TextBlock Text="{loc:Loc Profile.Delay}" VerticalAlignment="Center" Margin="0,0,6,0" />
 
@@ -124,7 +130,7 @@
                 </StackPanel>
 
                 <!-- Handled -->
-                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
                     <ToggleButton x:Name="CbHandled" Content="{loc:Loc Profile.Handled}" Style="{StaticResource ToggleButtonStyle}" Margin="5,0" />
                     <Path Width="16" Height="16" Margin="0,0,4,0" VerticalAlignment="Center"
                           Fill="{StaticResource TextTertiaryBrush}" Cursor="Help" Stretch="Uniform"
@@ -139,7 +145,7 @@
                 </StackPanel>
 
                 <!-- Open as Tab -->
-                <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
+                <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center">
                     <ToggleButton x:Name="CbOpenAsTab" Content="{loc:Loc Profile.Tab}" Style="{StaticResource ToggleButtonStyle}" Margin="5,0" />
                     <Path Width="16" Height="16" Margin="0,0,4,0" VerticalAlignment="Center"
                           Fill="{StaticResource TextTertiaryBrush}" Cursor="Help" Stretch="Uniform"
