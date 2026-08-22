@@ -311,7 +311,6 @@ public static class Helper
         return scope switch
         {
             HotkeyScope.FileExplorer => true,
-            HotkeyScope.Tab => TryGetActiveExplorerTab(foregroundWindow, out _),
             HotkeyScope.TabContainer => mousePosition is { } point
                 ? IsTabContainerAtPoint(foregroundWindow, point)
                 : TryGetActiveExplorerTab(foregroundWindow, out _),

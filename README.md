@@ -217,7 +217,6 @@ Each profile contains the following settings:
      - `Global`: system-wide
      - `FileExplorer`: any foreground File Explorer window
      - `TabContainer`: the active Explorer tab container for keyboard shortcuts, or the tab strip under the pointer for mouse shortcuts
-     - `Tab`: the active tab in a foreground File Explorer window
    - Action Type:
      - `Open`: Open a specific location
      - `Duplicate`: Duplicate the current tab

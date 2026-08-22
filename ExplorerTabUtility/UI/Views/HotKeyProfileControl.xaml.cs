@@ -413,7 +413,7 @@ public partial class HotKeyProfileControl : UserControl
                 HotKeyAction.SnapUp,
                 HotKeyAction.SnapDown
             ],
-            HotkeyScope.TabContainer or HotkeyScope.Tab =>
+            HotkeyScope.TabContainer =>
             [
                 HotKeyAction.Open,
                 HotKeyAction.Duplicate,
