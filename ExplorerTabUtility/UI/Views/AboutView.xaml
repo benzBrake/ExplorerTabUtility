@@ -202,6 +202,33 @@
             </Style.Triggers>
         </Style>
 
+        <Style x:Key="OriginalProjectLinkStyle" TargetType="Button">
+            <Setter Property="Height" Value="28" />
+            <Setter Property="Margin" Value="0,2,0,0" />
+            <Setter Property="Padding" Value="8,0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
         <Style x:Key="SectionTitleStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="20" />
             <Setter Property="FontWeight" Value="SemiBold" />
@@ -456,6 +483,14 @@
                                            VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
+
+                        <Button x:Name="BtnOriginalGitHub"
+                                Style="{StaticResource OriginalProjectLinkStyle}"
+                                ToolTip="{loc:Loc About.OriginalProjectTip}"
+                                Click="OpenOriginalProjectPage">
+                            <TextBlock Text="{loc:Loc About.OriginalProject}"
+                                       TextDecorations="Underline" />
+                        </Button>
                     </StackPanel>
                 </Border>
 
@@ -533,7 +568,7 @@
                         <Border Margin="0,24,0,0" CornerRadius="8"
                                 Style="{StaticResource ProfileCardStyle}">
                             <StackPanel>
-                        <TextBlock Text="{loc:Loc About.Developer}"
+                        <TextBlock Text="{loc:Loc About.Developers}"
                                            FontWeight="SemiBold"
                                            FontSize="18"
                                            Foreground="{StaticResource TextPrimaryBrush}"
@@ -582,6 +617,39 @@
                                                        Cursor="Hand"
                                                        TextDecorations="Underline"
                                                        MouseLeftButtonUp="OpenDeveloperPage"
+                                                       Foreground="{StaticResource AccentBrush}" />
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Grid>
+
+                                <Grid Margin="0,16,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Maintainer Avatar -->
+                                    <Border Margin="0,0,16,0"
+                                            Style="{StaticResource SupporterAvatarStyle}"
+                                            MouseLeftButtonUp="OpenRyanPage">
+                                        <Border.Background>
+                                            <ImageBrush ImageSource="https://github.com/benzBrake.png?size=160" />
+                                        </Border.Background>
+                                    </Border>
+
+                                    <!-- Maintainer Info -->
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="Ryan Lieu"
+                                                   FontWeight="SemiBold"
+                                                   FontSize="16"
+                                                   Cursor="Hand"
+                                                   MouseLeftButtonUp="OpenRyanPage"
+                                                   Foreground="{StaticResource TextPrimaryBrush}" />
+                                        <TextBlock Margin="0,4,0,0">
+                                            <TextBlock Text="github.com/benzBrake"
+                                                       Cursor="Hand"
+                                                       TextDecorations="Underline"
+                                                       MouseLeftButtonUp="OpenRyanPage"
                                                        Foreground="{StaticResource AccentBrush}" />
                                         </TextBlock>
                                     </StackPanel>
