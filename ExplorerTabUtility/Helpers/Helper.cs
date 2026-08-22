@@ -14,6 +14,7 @@ using ExplorerTabUtility.Interop;
 using ExplorerTabUtility.Managers;
 using ExplorerTabUtility.Models;
 using ExplorerTabUtility.WinAPI;
+using ExplorerTabUtility.Localization;
 using H.Hooks;
 
 namespace ExplorerTabUtility.Helpers;
@@ -225,15 +226,15 @@ public static class Helper
         MouseWheelDirection mouseWheelDirection = MouseWheelDirection.None)
     {
         var text = string.Join(" + ", keys.Select(k => k.ToDisplayString(mouseWheelDirection)));
-        if (isDoubleClick) text += "_DBL";
+        if (isDoubleClick) text += LocalizationManager.Instance["Input.DoubleClickSuffix"];
         return text;
     }
     public static string ToDisplayString(this Key key, MouseWheelDirection mouseWheelDirection = MouseWheelDirection.None)
     {
         return key switch
         {
-            Key.MouseWheel when mouseWheelDirection == MouseWheelDirection.Up => "Wheel Up",
-            Key.MouseWheel when mouseWheelDirection == MouseWheelDirection.Down => "Wheel Down",
+            Key.MouseWheel when mouseWheelDirection == MouseWheelDirection.Up => LocalizationManager.Instance["Input.MouseWheelUp"],
+            Key.MouseWheel when mouseWheelDirection == MouseWheelDirection.Down => LocalizationManager.Instance["Input.MouseWheelDown"],
             Key.Add => "+",
             Key.Subtract => "-",
             Key.Multiply => "*",
@@ -259,11 +260,11 @@ public static class Helper
             >= Key.D0 and <= Key.D9 => key.ToString().Replace("D", ""),
 
             // Mouse buttons
-            Key.MouseLeft or Key.LButton => "LMB",
-            Key.MouseRight or Key.RButton => "RMB",
-            Key.MouseMiddle or Key.MButton => "MMB",
-            Key.MouseXButton1 => "X1",
-            Key.MouseXButton2 => "X2",
+            Key.MouseLeft or Key.LButton => LocalizationManager.Instance["Input.MouseLeft"],
+            Key.MouseRight or Key.RButton => LocalizationManager.Instance["Input.MouseRight"],
+            Key.MouseMiddle or Key.MButton => LocalizationManager.Instance["Input.MouseMiddle"],
+            Key.MouseXButton1 => LocalizationManager.Instance["Input.MouseX1"],
+            Key.MouseXButton2 => LocalizationManager.Instance["Input.MouseX2"],
 
             // Default case
             _ => key.ToFixedString().Replace("Button", "")

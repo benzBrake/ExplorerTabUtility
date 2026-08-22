@@ -97,6 +97,8 @@ public partial class HotKeyProfileControl : UserControl
         if (e.PropertyName != "Item[]") return;
         CbScope.Items.Refresh();
         CbAction.Items.Refresh();
+        if (_profile.HotKeys != null)
+            TxtHotKeys.Text = _profile.HotKeys.HotKeysToString(_profile.IsDoubleClick, _profile.MouseWheelDirection);
     }
 
     // Event handlers
