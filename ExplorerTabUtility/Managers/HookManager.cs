@@ -67,11 +67,11 @@ public sealed class HookManager
                 break;
 
             case HotKeyAction.PreviousTab:
-                await SendTabShortcut(e.Profile, e.ForegroundWindow, VirtualKey.Tab, withShift: true);
+                await SelectAdjacentTab(e.Profile, e.ForegroundWindow, direction: -1);
                 break;
 
             case HotKeyAction.NextTab:
-                await SendTabShortcut(e.Profile, e.ForegroundWindow, VirtualKey.Tab, withShift: false);
+                await SelectAdjacentTab(e.Profile, e.ForegroundWindow, direction: 1);
                 break;
 
             case HotKeyAction.CloseCurrentTab:
@@ -151,6 +151,13 @@ public sealed class HookManager
             KeyboardSimulator.ModifiedKeyStroke(VirtualKey.Alt, VirtualKey.Up);
         else if (Helper.IsExplorerEmptySpace(position))
             KeyboardSimulator.ModifiedKeyStroke(VirtualKey.Alt, VirtualKey.Up);
+    }
+    private static async Task SelectAdjacentTab(HotKeyProfile profile, nint explorerWindow, int direction)
+    {
+        if (profile.Delay > 0)
+            await Task.Delay(profile.Delay);
+
+        Helper.TrySelectAdjacentExplorerTab(explorerWindow, direction);
     }
     private static async Task SendTabShortcut(HotKeyProfile profile, nint foregroundWindow, VirtualKey key, bool withShift)
     {

@@ -22,6 +22,8 @@ public static class Helper
 {
     private static int _lastCtrlShiftCheckAt;
     private static bool _lastCtrlShiftCheckValue;
+    private static int _tabSelectionInProgress;
+    private static int _lastTabSelectionAt;
     public static readonly ConcurrentDictionary<nint, RECT?> HiddenWindows = new();
 
     public static Task DoDelayedBackgroundAsync(Action action, int delayMs = 2_000, CancellationToken cancellationToken = default)
@@ -345,22 +347,12 @@ public static class Helper
 
     private static bool TryIsTabAutomationElementAtPoint(nint explorerWindow, Point point, out bool isTabStrip)
     {
-        const string tabViewAutomationId = "TabView";
-        const string tabViewClassName = "Microsoft.UI.Xaml.Controls.TabView";
-
         isTabStrip = false;
 
         try
         {
             var root = AutomationElement.FromHandle(explorerWindow);
-            var tabViews = root.FindAll(TreeScope.Descendants,
-                new AndCondition(
-                    new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Tab),
-                    new OrCondition(
-                        new PropertyCondition(AutomationElement.AutomationIdProperty, tabViewAutomationId),
-                        new PropertyCondition(AutomationElement.ClassNameProperty, tabViewClassName))));
-
-            foreach (AutomationElement tabView in tabViews)
+            foreach (AutomationElement tabView in FindExplorerTabViews(root))
             {
                 var properties = tabView.Current;
                 isTabStrip = IsPointInBounds(properties.BoundingRectangle, point);
@@ -381,6 +373,84 @@ public static class Helper
         }
 
         return false;
+    }
+
+    public static bool TrySelectAdjacentExplorerTab(nint explorerWindow, int direction)
+    {
+        const int tabSelectionThrottleMs = 100;
+
+        if (direction is not -1 and not 1 || !IsFileExplorerWindow(explorerWindow))
+            return false;
+
+        if (Interlocked.CompareExchange(ref _tabSelectionInProgress, 1, 0) != 0)
+            return false;
+
+        try
+        {
+            var now = Environment.TickCount;
+            if (unchecked(now - Volatile.Read(ref _lastTabSelectionAt)) < tabSelectionThrottleMs)
+                return false;
+
+            var root = AutomationElement.FromHandle(explorerWindow);
+            foreach (AutomationElement tabView in FindExplorerTabViews(root))
+            {
+                var tabItems = new List<(AutomationElement Element, SelectionItemPattern Pattern)>();
+                foreach (AutomationElement tabItem in tabView.FindAll(TreeScope.Descendants,
+                             new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.TabItem)))
+                {
+                    var properties = tabItem.Current;
+                    if (properties.BoundingRectangle.IsEmpty || properties.BoundingRectangle.Width <= 0 ||
+                        properties.BoundingRectangle.Height <= 0)
+                        continue;
+
+                    if (!tabItem.TryGetCurrentPattern(SelectionItemPattern.Pattern, out var pattern) ||
+                        pattern is not SelectionItemPattern selectionPattern)
+                        continue;
+
+                    tabItems.Add((tabItem, selectionPattern));
+                }
+
+                var selectedIndex = tabItems.FindIndex(static tab => tab.Pattern.Current.IsSelected);
+                var targetIndex = selectedIndex + direction;
+                if (selectedIndex < 0 || targetIndex < 0 || targetIndex >= tabItems.Count)
+                    continue;
+
+                tabItems[targetIndex].Pattern.Select();
+                Volatile.Write(ref _lastTabSelectionAt, now);
+                return true;
+            }
+        }
+        catch (ElementNotAvailableException)
+        {
+            return false;
+        }
+        catch (InvalidOperationException)
+        {
+            return false;
+        }
+        catch (COMException)
+        {
+            return false;
+        }
+        finally
+        {
+            Volatile.Write(ref _tabSelectionInProgress, 0);
+        }
+
+        return false;
+    }
+
+    private static AutomationElementCollection FindExplorerTabViews(AutomationElement root)
+    {
+        const string tabViewAutomationId = "TabView";
+        const string tabViewClassName = "Microsoft.UI.Xaml.Controls.TabView";
+
+        return root.FindAll(TreeScope.Descendants,
+            new AndCondition(
+                new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Tab),
+                new OrCondition(
+                    new PropertyCondition(AutomationElement.AutomationIdProperty, tabViewAutomationId),
+                    new PropertyCondition(AutomationElement.ClassNameProperty, tabViewClassName))));
     }
 
     private static bool IsPointInBounds(System.Windows.Rect bounds, Point point)
