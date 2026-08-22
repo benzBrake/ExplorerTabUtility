@@ -88,9 +88,25 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Path -->
-                <TextBox Grid.Column="0" x:Name="TxtPath" Tag="{loc:Loc Profile.Location}" Style="{StaticResource CustomTextBoxStyle}"
-                         ContextMenu="{StaticResource TextBoxCustomContextMenu}"
-                         ToolTip="{loc:Loc Profile.LocationTip}" />
+                <Grid Grid.Column="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox Grid.Column="0" x:Name="TxtPath" Tag="{loc:Loc Profile.Location}" Style="{StaticResource CustomTextBoxStyle}"
+                             ContextMenu="{StaticResource TextBoxCustomContextMenu}"
+                             ToolTip="{loc:Loc Profile.LocationTip}" />
+                    <Path Grid.Column="1" Width="16" Height="16" Margin="4,0" VerticalAlignment="Center"
+                          Fill="{StaticResource TextTertiaryBrush}" Cursor="Help" Stretch="Uniform"
+                          ToolTipService.InitialShowDelay="0" ToolTipService.ShowDuration="20000"
+                          Data="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z">
+                        <Path.ToolTip>
+                            <ToolTip MaxWidth="320">
+                                <TextBlock Text="{loc:Loc Profile.LocationTip}" TextWrapping="Wrap" />
+                            </ToolTip>
+                        </Path.ToolTip>
+                    </Path>
+                </Grid>
 
                 <!-- Delay -->
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="6"
@@ -108,12 +124,34 @@
                 </StackPanel>
 
                 <!-- Handled -->
-                <ToggleButton Grid.Column="2" x:Name="CbHandled" Content="{loc:Loc Profile.Handled}" Style="{StaticResource ToggleButtonStyle}" Margin="5,0"
-                              ToolTip="{loc:Loc Profile.HandledTip}" />
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <ToggleButton x:Name="CbHandled" Content="{loc:Loc Profile.Handled}" Style="{StaticResource ToggleButtonStyle}" Margin="5,0" />
+                    <Path Width="16" Height="16" Margin="0,0,4,0" VerticalAlignment="Center"
+                          Fill="{StaticResource TextTertiaryBrush}" Cursor="Help" Stretch="Uniform"
+                          ToolTipService.InitialShowDelay="0" ToolTipService.ShowDuration="20000"
+                          Data="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z">
+                        <Path.ToolTip>
+                            <ToolTip MaxWidth="320">
+                                <TextBlock Text="{loc:Loc Profile.HandledTip}" TextWrapping="Wrap" />
+                            </ToolTip>
+                        </Path.ToolTip>
+                    </Path>
+                </StackPanel>
 
                 <!-- Open as Tab -->
-                <ToggleButton Grid.Column="3" x:Name="CbOpenAsTab" Content="{loc:Loc Profile.Tab}" Style="{StaticResource ToggleButtonStyle}" Margin="5,0"
-                              ToolTip="{loc:Loc Profile.TabTip}" />
+                <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
+                    <ToggleButton x:Name="CbOpenAsTab" Content="{loc:Loc Profile.Tab}" Style="{StaticResource ToggleButtonStyle}" Margin="5,0" />
+                    <Path Width="16" Height="16" Margin="0,0,4,0" VerticalAlignment="Center"
+                          Fill="{StaticResource TextTertiaryBrush}" Cursor="Help" Stretch="Uniform"
+                          ToolTipService.InitialShowDelay="0" ToolTipService.ShowDuration="20000"
+                          Data="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z">
+                        <Path.ToolTip>
+                            <ToolTip MaxWidth="320">
+                                <TextBlock Text="{loc:Loc Profile.TabTip}" TextWrapping="Wrap" />
+                            </ToolTip>
+                        </Path.ToolTip>
+                    </Path>
+                </StackPanel>
             </Grid>
         </Grid>
     </Border>
