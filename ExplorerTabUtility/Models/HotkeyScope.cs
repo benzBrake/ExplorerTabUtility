@@ -3,5 +3,7 @@
 public enum HotkeyScope
 {
     Global,
-    FileExplorer
+    FileExplorer,
+    TabContainer,
+    Tab
 }

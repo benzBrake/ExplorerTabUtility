@@ -1,13 +1,18 @@
 ﻿using System.Linq;
+using System;
 using System.ComponentModel;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Threading;
 using ExplorerTabUtility.WinAPI;
 
 namespace ExplorerTabUtility.Helpers;
 
 public static class KeyboardSimulator
 {
+    private static int _sendingTabShortcut;
+    private static int _suppressTabShortcutUntil;
+
     public static readonly VirtualKey[] ModifierKeys =
     [
         VirtualKey.LeftShift,
@@ -46,6 +51,42 @@ public static class KeyboardSimulator
     public static bool IsKeyPressed(int keyCode)
     {
         return (WinApi.GetAsyncKeyState(keyCode) & 0x8000) != 0;
+    }
+    public static bool IsSendingTabShortcut =>
+        Volatile.Read(ref _sendingTabShortcut) > 0 ||
+        unchecked(Environment.TickCount - Volatile.Read(ref _suppressTabShortcutUntil)) < 0;
+
+    public static void SendTabShortcut(VirtualKey keyCode, bool withShift)
+    {
+        var pressedModifiers = ModifierKeys.Where(key => IsKeyPressed((int)key)).ToArray();
+        var inputs = new List<INPUT>();
+
+        foreach (var modifier in pressedModifiers)
+            inputs.AddKeyUp(modifier);
+
+        inputs.AddKeyDown(VirtualKey.LeftControl);
+        if (withShift)
+            inputs.AddKeyDown(VirtualKey.LeftShift);
+
+        inputs.AddKeyPress(keyCode);
+
+        if (withShift)
+            inputs.AddKeyUp(VirtualKey.LeftShift);
+        inputs.AddKeyUp(VirtualKey.LeftControl);
+
+        foreach (var modifier in pressedModifiers)
+            inputs.AddKeyDown(modifier);
+
+        Interlocked.Increment(ref _sendingTabShortcut);
+        Volatile.Write(ref _suppressTabShortcutUntil, unchecked(Environment.TickCount + 100));
+        try
+        {
+            SendInputs(inputs.ToArray());
+        }
+        finally
+        {
+            Interlocked.Decrement(ref _sendingTabShortcut);
+        }
     }
 
     public static void ModifiedKeyStroke(VirtualKey modifierKeyCode, VirtualKey keyCode)

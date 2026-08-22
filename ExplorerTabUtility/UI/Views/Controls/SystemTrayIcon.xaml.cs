@@ -122,22 +122,24 @@ public partial class SystemTrayIcon : UserControl, IDisposable
     public void SetTrayIconVisibility(bool visible) => TrayIcon.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
     private void OnNotifyIconDoubleClick(object sender, RoutedEventArgs _) => _showWindowAction();
 
-    private void ToggleKeyboardHookMenu()
-    {
-        KeyboardHookMenu.IsChecked = !KeyboardHookMenu.IsChecked;
+    private void ToggleKeyboardHookMenu() => SetKeyboardHookMenuState(!KeyboardHookMenu.IsChecked);
 
-        ToggleHookState(KeyboardHookMenu,
+    private void SetKeyboardHookMenuState(bool isActive)
+    {
+        SetHookState(KeyboardHookMenu,
+            isActive,
             v => SettingsManager.IsKeyboardHookActive = v,
             _hookManager.StartKeyboardHook,
             _hookManager.StopKeyboardHook
         );
     }
 
-    private void ToggleMouseHookMenu()
-    {
-        MouseHookMenu.IsChecked = !MouseHookMenu.IsChecked;
+    private void ToggleMouseHookMenu() => SetMouseHookMenuState(!MouseHookMenu.IsChecked);
 
-        ToggleHookState(MouseHookMenu,
+    private void SetMouseHookMenuState(bool isActive)
+    {
+        SetHookState(MouseHookMenu,
+            isActive,
             v => SettingsManager.IsMouseHookActive = v,
             _hookManager.StartMouseHook,
             _hookManager.StopMouseHook
@@ -146,7 +148,8 @@ public partial class SystemTrayIcon : UserControl, IDisposable
 
     private void ToggleWindowHook()
     {
-        ToggleHookState(WindowHook,
+        SetHookState(WindowHook,
+            WindowHook.IsChecked,
             v => SettingsManager.IsWindowHookActive = v,
             _hookManager.StartWindowHook,
             _hookManager.StopWindowHook
@@ -159,10 +162,11 @@ public partial class SystemTrayIcon : UserControl, IDisposable
         }
     }
 
-    private static void ToggleHookState(MenuItem parent, Action<bool> setSetting, Action startHook, Action stopHook)
+    private static void SetHookState(MenuItem parent, bool isActive, Action<bool> setSetting, Action startHook, Action stopHook)
     {
-        setSetting(parent.IsChecked);
-        (parent.IsChecked ? startHook : stopHook)();
+        parent.IsChecked = isActive;
+        setSetting(isActive);
+        (isActive ? startHook : stopHook)();
 
         if (parent.Name?.EndsWith("Menu") != true) return;
 
@@ -230,7 +234,12 @@ public partial class SystemTrayIcon : UserControl, IDisposable
         // At least one subitem is checked, check the parent (if autoCheckParent)
         var desiredParentChecked = anyChecked && (parent.IsChecked || autoCheckParent);
         if (desiredParentChecked != parent.IsChecked)
-            parent.Command.Execute(parent.CommandParameter);
+        {
+            if (parent == KeyboardHookMenu)
+                SetKeyboardHookMenuState(desiredParentChecked);
+            else if (parent == MouseHookMenu)
+                SetMouseHookMenuState(desiredParentChecked);
+        }
     }
 
     private void OnProfileItemClick(object? sender)

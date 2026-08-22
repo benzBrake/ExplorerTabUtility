@@ -53,7 +53,7 @@ public partial class HotKeyProfileControl : UserControl
         TxtName.Text = _profile.Name ?? string.Empty;
 
         if (_profile.HotKeys != null)
-            TxtHotKeys.Text = _profile.HotKeys.HotKeysToString(_profile.IsDoubleClick);
+            TxtHotKeys.Text = _profile.HotKeys.HotKeysToString(_profile.IsDoubleClick, _profile.MouseWheelDirection);
 
         // Setup ComboBoxes
         CbScope.ItemsSource = Enum.GetValues(typeof(HotkeyScope));
@@ -179,7 +179,32 @@ public partial class HotKeyProfileControl : UserControl
         _profile.IsMouse = isMouse;
         _profile.IsDoubleClick = isDoubleClick;
 
+        _profile.MouseWheelDirection = MouseWheelDirection.None;
         Dispatcher.Invoke(() => TxtHotKeys.Text = keys.HotKeysToString(isDoubleClick));
+    }
+
+    private void LowLevelHook_Wheel(object? _, MouseEventArgs e)
+    {
+        if (!IsMouseOverHotkeyTextBox())
+        {
+            MoveFocus(null);
+            return;
+        }
+
+        if (e.Delta == 0 || !e.Keys.Values.Contains(Key.MouseWheel)) return;
+
+        e.IsHandled = true;
+        var direction = e.Delta > 0 ? MouseWheelDirection.Up : MouseWheelDirection.Down;
+        var keys = e.Keys.Values
+            .OrderByDescending(key => key is Key.LWin or Key.RWin)
+            .ThenBy(key => key)
+            .ToArray();
+
+        _profile.HotKeys = keys;
+        _profile.IsMouse = true;
+        _profile.IsDoubleClick = false;
+        _profile.MouseWheelDirection = direction;
+        Dispatcher.Invoke(() => TxtHotKeys.Text = keys.HotKeysToString(false, direction));
     }
 
     private void MoveFocus(System.Windows.Input.FocusNavigationDirection? direction)
@@ -322,6 +347,21 @@ public partial class HotKeyProfileControl : UserControl
                 HotKeyAction.SnapUp,
                 HotKeyAction.SnapDown
             ],
+            HotkeyScope.TabContainer or HotkeyScope.Tab =>
+            [
+                HotKeyAction.Open,
+                HotKeyAction.Duplicate,
+                HotKeyAction.ReopenClosed,
+                HotKeyAction.TabSearch,
+                HotKeyAction.NavigateBack,
+                HotKeyAction.NavigateUp,
+                HotKeyAction.NavigateForward,
+                HotKeyAction.SetTargetWindow,
+                HotKeyAction.DetachTab,
+                HotKeyAction.PreviousTab,
+                HotKeyAction.NextTab,
+                HotKeyAction.CloseCurrentTab
+            ],
             _ => Enum.GetValues(typeof(HotKeyAction))
                 .OfType<HotKeyAction>()
                 .ToArray()
@@ -339,6 +379,7 @@ public partial class HotKeyProfileControl : UserControl
 
         _lowLevelMouseHook = new LowLevelMouseHook { AddKeyboardKeys = true };
         _lowLevelMouseHook.Down += LowLevelHook_Down;
+        _lowLevelMouseHook.Wheel += LowLevelHook_Wheel;
         _lowLevelMouseHook.Start();
     }
 

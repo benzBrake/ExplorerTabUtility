@@ -17,6 +17,7 @@ public class HotKeyProfile
     public bool IsAsTab { get; set; } = true;
     public bool IsMouse { get; set; }
     public bool IsDoubleClick { get; set; }
+    public MouseWheelDirection MouseWheelDirection { get; set; }
     public int Delay { get; set; }
 
     public HotKeyProfile() { }
@@ -45,6 +46,7 @@ public class HotKeyProfile
             IsAsTab = IsAsTab,
             IsMouse = IsMouse,
             IsDoubleClick = IsDoubleClick,
+            MouseWheelDirection = MouseWheelDirection,
             Delay = Delay
         };
     }

@@ -66,6 +66,18 @@ public sealed class HookManager
                 await _windowHook.DetachCurrentTab(e.ForegroundWindow);
                 break;
 
+            case HotKeyAction.PreviousTab:
+                await SendTabShortcut(e.Profile, e.ForegroundWindow, VirtualKey.Tab, withShift: true);
+                break;
+
+            case HotKeyAction.NextTab:
+                await SendTabShortcut(e.Profile, e.ForegroundWindow, VirtualKey.Tab, withShift: false);
+                break;
+
+            case HotKeyAction.CloseCurrentTab:
+                await SendTabShortcut(e.Profile, e.ForegroundWindow, VirtualKey.W, withShift: false);
+                break;
+
             case HotKeyAction.SetTargetWindow:
                 _windowHook.SetTargetWindow(e.ForegroundWindow);
                 break;
@@ -139,6 +151,19 @@ public sealed class HookManager
             KeyboardSimulator.ModifiedKeyStroke(VirtualKey.Alt, VirtualKey.Up);
         else if (Helper.IsExplorerEmptySpace(position))
             KeyboardSimulator.ModifiedKeyStroke(VirtualKey.Alt, VirtualKey.Up);
+    }
+    private static async Task SendTabShortcut(HotKeyProfile profile, nint foregroundWindow, VirtualKey key, bool withShift)
+    {
+        if (profile.Delay > 0)
+            await Task.Delay(profile.Delay);
+
+        if (foregroundWindow == 0)
+            return;
+
+        // The hook already verified the tab-strip scope. Its asynchronous dispatch can race with a transient
+        // foreground change, so restore the matched Explorer window before delivering the shortcut.
+        WinApi.RestoreWindowToForeground(foregroundWindow);
+        KeyboardSimulator.SendTabShortcut(key, withShift);
     }
 
     private async Task SnapForegroundWindow(HotKeyAction direction, int delay = 0)

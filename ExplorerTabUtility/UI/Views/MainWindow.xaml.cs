@@ -210,7 +210,7 @@ public partial class MainWindow : Window
         if (isChecked && showAlert && !SettingsManager.IsTrayIconHidden)
         {
             var message = canToggleVisibility
-                ? string.Format(LocalizationManager.Instance["Dialog.HideTrayWithHotkey"], profile!.HotKeys!.HotKeysToString(profile.IsDoubleClick))
+                ? string.Format(LocalizationManager.Instance["Dialog.HideTrayWithHotkey"], profile!.HotKeys!.HotKeysToString(profile.IsDoubleClick, profile.MouseWheelDirection))
                 : LocalizationManager.Instance["Dialog.HideTrayNoHotkey"];
 
             CustomMessageBox.Show(this, message, LocalizationManager.Instance["App.Name"]);

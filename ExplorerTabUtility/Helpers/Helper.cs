@@ -9,6 +9,7 @@ using System.ComponentModel;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
+using System.Windows.Automation;
 using ExplorerTabUtility.Interop;
 using ExplorerTabUtility.Managers;
 using ExplorerTabUtility.Models;
@@ -214,16 +215,19 @@ public static class Helper
         var fieldInfo = value.GetType().GetField(value.ToString());
         return fieldInfo?.GetCustomAttribute<DescriptionAttribute>()?.Description ?? value.ToString();
     }
-    public static string HotKeysToString(this IEnumerable<Key> keys, bool isDoubleClick = false)
+    public static string HotKeysToString(this IEnumerable<Key> keys, bool isDoubleClick = false,
+        MouseWheelDirection mouseWheelDirection = MouseWheelDirection.None)
     {
-        var text = string.Join(" + ", keys.Select(k => k.ToDisplayString()));
+        var text = string.Join(" + ", keys.Select(k => k.ToDisplayString(mouseWheelDirection)));
         if (isDoubleClick) text += "_DBL";
         return text;
     }
-    public static string ToDisplayString(this Key key)
+    public static string ToDisplayString(this Key key, MouseWheelDirection mouseWheelDirection = MouseWheelDirection.None)
     {
         return key switch
         {
+            Key.MouseWheel when mouseWheelDirection == MouseWheelDirection.Up => "Wheel Up",
+            Key.MouseWheel when mouseWheelDirection == MouseWheelDirection.Down => "Wheel Down",
             Key.Add => "+",
             Key.Subtract => "-",
             Key.Multiply => "*",
@@ -283,6 +287,149 @@ public static class Helper
     {
         foregroundWindow = WinApi.GetForegroundWindow();
         return IsFileExplorerWindow(foregroundWindow);
+    }
+    public static bool MatchesHotkeyScope(HotkeyScope scope, Point? mousePosition, out nint foregroundWindow)
+    {
+        // Preserve the existing Global behavior: actions in this scope do not target a foreground Explorer window.
+        if (scope == HotkeyScope.Global)
+        {
+            foregroundWindow = 0;
+            return true;
+        }
+
+        foregroundWindow = WinApi.GetForegroundWindow();
+        if (!IsFileExplorerWindow(foregroundWindow))
+            return false;
+
+        return scope switch
+        {
+            HotkeyScope.FileExplorer => true,
+            HotkeyScope.Tab => TryGetActiveExplorerTab(foregroundWindow, out _),
+            HotkeyScope.TabContainer => mousePosition is { } point
+                ? IsTabContainerAtPoint(foregroundWindow, point)
+                : TryGetActiveExplorerTab(foregroundWindow, out _),
+            _ => false
+        };
+    }
+    public static bool TryGetActiveExplorerTab(nint explorerWindow, out nint tab)
+    {
+        tab = 0;
+        if (!IsFileExplorerWindow(explorerWindow))
+            return false;
+
+        foreach (var candidate in GetAllExplorerTabs(explorerWindow))
+        {
+            tab = candidate;
+            if (WinApi.IsWindowVisible(candidate))
+                return true;
+        }
+
+        return tab != 0;
+    }
+    public static bool IsTabContainerAtPoint(nint explorerWindow, Point point)
+    {
+        var hitWindow = WinApi.WindowFromPoint(point);
+        if (hitWindow == 0 || !IsWindowInExplorer(hitWindow, explorerWindow))
+            return false;
+
+        if (TryIsTabAutomationElementAtPoint(explorerWindow, point, out var isTabStrip))
+            return isTabStrip;
+
+        var result = WinApi.AccessibleObjectFromPoint(point, out var accessible, out var childId);
+        if (result != 0)
+            return false;
+
+        // UIA is authoritative for current Explorer. Keep the legacy accessibility check as a fallback.
+        return IsTabAccessibleObject(accessible, childId);
+    }
+
+    private static bool TryIsTabAutomationElementAtPoint(nint explorerWindow, Point point, out bool isTabStrip)
+    {
+        const string tabViewAutomationId = "TabView";
+        const string tabViewClassName = "Microsoft.UI.Xaml.Controls.TabView";
+
+        isTabStrip = false;
+
+        try
+        {
+            var root = AutomationElement.FromHandle(explorerWindow);
+            var tabViews = root.FindAll(TreeScope.Descendants,
+                new AndCondition(
+                    new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Tab),
+                    new OrCondition(
+                        new PropertyCondition(AutomationElement.AutomationIdProperty, tabViewAutomationId),
+                        new PropertyCondition(AutomationElement.ClassNameProperty, tabViewClassName))));
+
+            foreach (AutomationElement tabView in tabViews)
+            {
+                var properties = tabView.Current;
+                isTabStrip = IsPointInBounds(properties.BoundingRectangle, point);
+                return true;
+            }
+        }
+        catch (ElementNotAvailableException)
+        {
+            return false;
+        }
+        catch (InvalidOperationException)
+        {
+            return false;
+        }
+        catch (COMException)
+        {
+            return false;
+        }
+
+        return false;
+    }
+
+    private static bool IsPointInBounds(System.Windows.Rect bounds, Point point)
+    {
+        return !bounds.IsEmpty && bounds.Width > 0 && bounds.Height > 0 &&
+               point.X >= bounds.Left && point.X < bounds.Right &&
+               point.Y >= bounds.Top && point.Y < bounds.Bottom;
+    }
+
+    private static bool IsTabAccessibleObject(IAccessible accessible, object childId)
+    {
+        const int RoleSystemPageTab = 0x25;
+        const int RoleSystemPageTabList = 0x3C;
+
+        object current = accessible;
+        object currentChildId = childId;
+
+        // Keep the walk bounded in case an accessibility provider returns a cyclic parent relationship.
+        for (var depth = 0; depth < 16 && current is IAccessible currentAccessible; depth++)
+        {
+            try
+            {
+                var role = currentAccessible.get_accRole(currentChildId);
+                if (role is int intRole && intRole is RoleSystemPageTab or RoleSystemPageTabList ||
+                    role is short shortRole && shortRole is RoleSystemPageTab or RoleSystemPageTabList ||
+                    role is ushort ushortRole && ushortRole is RoleSystemPageTab or RoleSystemPageTabList)
+                    return true;
+
+                current = currentAccessible.get_accParent();
+                currentChildId = 0;
+            }
+            catch (COMException)
+            {
+                return false;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool IsWindowInExplorer(nint window, nint explorerWindow)
+    {
+        for (var current = window; current != 0; current = WinApi.GetParent(current))
+        {
+            if (current == explorerWindow)
+                return true;
+        }
+
+        return false;
     }
     public static nint GetAnotherExplorerWindow(nint currentWindow)
     {

@@ -27,10 +27,8 @@ public sealed class Keyboard : IHook
     private void LowLevelKeyboardHook_Down(object? sender, KeyboardEventArgs e)
     {
         var handler = OnHotKeyProfileTriggered;
-        if (handler == null) return;
+        if (handler == null || KeyboardSimulator.IsSendingTabShortcut) return;
 
-        bool? isFileExplorerForeground = null;
-        nint handle = 0;
         foreach (var profile in _hotkeyProfiles)
         {
             // Skip disabled, empty or mouse
@@ -40,18 +38,7 @@ public sealed class Keyboard : IHook
             // Skip if keys do not match
             if (!e.Keys.Are(profile.HotKeys)) continue;
 
-            // Let's see if we need to check File Explorer
-            if (profile.Scope == HotkeyScope.FileExplorer)
-            {
-                // Check if File Explorer is foreground (only once)
-                isFileExplorerForeground ??= Helper.IsFileExplorerForeground(out handle);
-
-                if (isFileExplorerForeground == false)
-                {
-                    handle = 0; // Reset handle if not File Explorer
-                    continue;
-                }
-            }
+            if (!Helper.MatchesHotkeyScope(profile.Scope, null, out var handle)) continue;
 
             // Set handled value.
             e.IsHandled = profile.IsHandled;

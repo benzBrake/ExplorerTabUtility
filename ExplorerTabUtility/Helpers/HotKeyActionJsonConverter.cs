@@ -56,7 +56,8 @@ public class HotKeyActionJsonConverter : JsonConverter<HotKeyAction>
             var enumString = reader.GetString()!;
 
             // Try to parse the string as an enum value
-            if (Enum.TryParse<HotKeyAction>(enumString, true, out var result))
+            if (Enum.TryParse<HotKeyAction>(enumString, true, out var result) &&
+                Enum.IsDefined(typeof(HotKeyAction), result))
             {
                 return result;
             }

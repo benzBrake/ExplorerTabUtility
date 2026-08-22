@@ -213,7 +213,11 @@ Each profile contains the following settings:
 
 1. **Basic Configuration**
    - Hotkey: Set keyboard shortcut (supports modifier keys)
-   - Scope: Global (system-wide) or Explorer (only in File Explorer)
+   - Scope:
+     - `Global`: system-wide
+     - `FileExplorer`: any foreground File Explorer window
+     - `TabContainer`: the active Explorer tab container for keyboard shortcuts, or the tab strip under the pointer for mouse shortcuts
+     - `Tab`: the active tab in a foreground File Explorer window
    - Action Type:
      - `Open`: Open a specific location
      - `Duplicate`: Duplicate the current tab
@@ -226,8 +230,11 @@ Each profile contains the following settings:
      - `ToggleWinHook`: Toggle the window hook on/off
      - `ToggleReuseTabs`: Toggle tab reuse on/off
      - `ToggleVisibility`: Show/hide the main window
-     - `DetachTab`: Detach the current tab to a new window
-     - `Snap`: Snap the current window to the screen edges (right/left/top/bottom)
+      - `DetachTab`: Detach the current tab to a new window
+      - `PreviousTab`: Switch to the previous Explorer tab (`Ctrl+Shift+Tab`)
+      - `NextTab`: Switch to the next Explorer tab (`Ctrl+Tab`)
+      - `CloseCurrentTab`: Close the current Explorer tab (`Ctrl+W`)
+      - `Snap`: Snap the current window to the screen edges (right/left/top/bottom)
    - Path Field (for `Open` action)
      - Optional: Leave empty to open new tab
      - Supports multiple path formats (see Custom Path Navigation section)

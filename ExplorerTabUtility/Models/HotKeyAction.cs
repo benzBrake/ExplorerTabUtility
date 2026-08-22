@@ -38,5 +38,11 @@ public enum HotKeyAction
     [Description("Snap the current window to the top.")]
     SnapUp,
     [Description("Snap the current window to the bottom.")]
-    SnapDown
+    SnapDown,
+    [Description("Switch to the previous File Explorer tab.")]
+    PreviousTab,
+    [Description("Switch to the next File Explorer tab.")]
+    NextTab,
+    [Description("Close the current File Explorer tab.")]
+    CloseCurrentTab
 }
