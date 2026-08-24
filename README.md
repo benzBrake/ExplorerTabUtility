@@ -4,7 +4,7 @@
 > Force new File Explorer windows to open as tabs in Windows 11, making your workflow cleaner and more organized!
 
 <div align="center">
-  <img src="https://cdn.jsdelivr.net/gh/w4po/ExplorerTabUtility@master/Assets/ExplorerTabUtilityLogo.gif" alt="Explorer Tab Utility Logo">
+  <img src="https://cdn.jsdelivr.net/gh/benzBrake/ExplorerTabUtility@master/Assets/ExplorerTabUtilityLogo.gif" alt="Explorer Tab Utility Logo">
   
   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
   [![Windows 11](https://img.shields.io/badge/Windows%2011-22H2+-blue.svg)](https://www.microsoft.com/windows/windows-11)
@@ -18,7 +18,7 @@
 ## 🤔 Why Explorer Tab Utility?
 
 <div align="center">
-  <img src="https://cdn.jsdelivr.net/gh/w4po/ExplorerTabUtility@master/Assets/TheWhy.png" alt="Why use Explorer Tab Utility">
+  <img src="https://cdn.jsdelivr.net/gh/benzBrake/ExplorerTabUtility@master/Assets/TheWhy.png" alt="Why use Explorer Tab Utility">
 </div>
 
 Say goodbye to cluttered desktops with multiple Explorer windows! Explorer Tab Utility automatically converts new windows into tabs, providing a cleaner and more organized file management experience.
@@ -36,7 +36,7 @@ Say goodbye to cluttered desktops with multiple Explorer windows! Explorer Tab U
 - Handles opening multiple tabs at once
 
 **See it in action:**
-![Window to tab conversion](https://cdn.jsdelivr.net/gh/w4po/ExplorerTabUtility@master/Assets/WindowToTab.gif)
+![Window to tab conversion](https://cdn.jsdelivr.net/gh/benzBrake/ExplorerTabUtility@master/Assets/WindowToTab.gif)
 </details>
 
 <details>
@@ -47,7 +47,7 @@ Say goodbye to cluttered desktops with multiple Explorer windows! Explorer Tab U
 - Preserves the current location and selected items
 
 **See it in action:**
-![Duplicate current tab](https://cdn.jsdelivr.net/gh/w4po/ExplorerTabUtility@master/Assets/DuplicateTab.gif)
+![Duplicate current tab](https://cdn.jsdelivr.net/gh/benzBrake/ExplorerTabUtility@master/Assets/DuplicateTab.gif)
 </details>
 
 <details>
@@ -59,7 +59,7 @@ Say goodbye to cluttered desktops with multiple Explorer windows! Explorer Tab U
 - History is saved across application restarts (enable "Save closed history" in settings)
 
 **See it in action:**
-![Reopen closed tabs](https://cdn.jsdelivr.net/gh/w4po/ExplorerTabUtility@master/Assets/ReopenClosedTab.gif)
+![Reopen closed tabs](https://cdn.jsdelivr.net/gh/benzBrake/ExplorerTabUtility@master/Assets/ReopenClosedTab.gif)
 </details>
 
 <details>
@@ -69,7 +69,7 @@ Say goodbye to cluttered desktops with multiple Explorer windows! Explorer Tab U
 - Configurable via "Restore previous windows" setting
 - Confirmation dialog allows you to choose whether to restore windows on first launch
 
-![Restore Previous Windows](https://cdn.jsdelivr.net/gh/w4po/ExplorerTabUtility@master/Assets/RestorePrevious.png)
+![Restore Previous Windows](https://cdn.jsdelivr.net/gh/benzBrake/ExplorerTabUtility@master/Assets/RestorePrevious.png)
 </details>
 
 <details>
@@ -85,7 +85,7 @@ Say goodbye to cluttered desktops with multiple Explorer windows! Explorer Tab U
 - Customize delays to match your system's performance
 
 **See it in action:**
-![Detach & Snap](https://cdn.jsdelivr.net/gh/w4po/ExplorerTabUtility@master/Assets/DetachSnap.gif)
+![Detach & Snap](https://cdn.jsdelivr.net/gh/benzBrake/ExplorerTabUtility@master/Assets/DetachSnap.gif)
 </details>
 
 <details>
@@ -97,7 +97,7 @@ Say goodbye to cluttered desktops with multiple Explorer windows! Explorer Tab U
 - Perfect for quick navigation between directories
 
 **See it in action:**
-![Navigate back/up](https://cdn.jsdelivr.net/gh/w4po/ExplorerTabUtility@master/Assets/NavigateBack.gif)
+![Navigate back/up](https://cdn.jsdelivr.net/gh/benzBrake/ExplorerTabUtility@master/Assets/NavigateBack.gif)
 </details>
 
 <details>
@@ -110,12 +110,12 @@ Say goodbye to cluttered desktops with multiple Explorer windows! Explorer Tab U
   - Environment variables: `%USERPROFILE%\Downloads`
   - Windows CLSID paths: `{A8CDFF1C-4878-43be-B5FD-F8091C1C60D0}` (Special Folders)
   - Programs and files: `C:\file.txt`
-  - URLs: `https://github.com/w4po/ExplorerTabUtility` (opens in default browser)
+  - URLs: `https://github.com/benzBrake/ExplorerTabUtility` (opens in default browser)
 - Perfect for frequently accessed locations
 - Instant access to system folders using CLSIDs
 
 **See it in action:**
-![Custom location](https://cdn.jsdelivr.net/gh/w4po/ExplorerTabUtility@master/Assets/CustomLocation.gif)
+![Custom location](https://cdn.jsdelivr.net/gh/benzBrake/ExplorerTabUtility@master/Assets/CustomLocation.gif)
 </details>
 
 <details>
@@ -130,7 +130,7 @@ Say goodbye to cluttered desktops with multiple Explorer windows! Explorer Tab U
   - CTRL key: Duplicate the tab even if it already exists
 - Clear recently closed windows history with a single click
 
-![Tab Search](https://cdn.jsdelivr.net/gh/w4po/ExplorerTabUtility@master/Assets/TabSearch.gif)
+![Tab Search](https://cdn.jsdelivr.net/gh/benzBrake/ExplorerTabUtility@master/Assets/TabSearch.gif)
 </details>
 
 <details>
@@ -152,17 +152,11 @@ Say goodbye to cluttered desktops with multiple Explorer windows! Explorer Tab U
 
 ## 🚀 Getting Started
 
-1. Download the latest version from the [Releases](https://github.com/w4po/ExplorerTabUtility/releases) page or install it via `winget` or `choco`:
-    ```powershell
-    winget install w4po.ExplorerTabUtility --interactive
-    ```
-    ```powershell
-    choco install explorertabutility --version 2.5.0 --params "/interactive"
-    ```
+1. Download the latest version from the [Releases](https://github.com/benzBrake/ExplorerTabUtility/releases) page.
 2. Run the application
 3. Look for the tray icon and you're ready to go!
 
-    ![Menu](https://cdn.jsdelivr.net/gh/w4po/ExplorerTabUtility@master/Assets/Menu.png)
+    ![Menu](https://cdn.jsdelivr.net/gh/benzBrake/ExplorerTabUtility@master/Assets/Menu.png)
 
 ## ⚙️ Configuration
 
@@ -196,7 +190,7 @@ Say goodbye to cluttered desktops with multiple Explorer windows! Explorer Tab U
 - **Hide tray icon**: Hide the system tray icon for a cleaner taskbar experience.
   * You must first configure a hotkey with the `ToggleVisibility` action before enabling this option
 
-![Preferences](https://cdn.jsdelivr.net/gh/w4po/ExplorerTabUtility@master/Assets/Preferences.png)
+![Preferences](https://cdn.jsdelivr.net/gh/benzBrake/ExplorerTabUtility@master/Assets/Preferences.png)
 </details>
 
 <details>
@@ -243,7 +237,7 @@ Each profile contains the following settings:
    - Key Handling: Toggle whether hotkeys are passed to other applications
    - Profile Deletion: Remove unwanted profiles
 
-![Form](https://cdn.jsdelivr.net/gh/w4po/ExplorerTabUtility@master/Assets/Form.png)
+![Form](https://cdn.jsdelivr.net/gh/benzBrake/ExplorerTabUtility@master/Assets/Form.png)
 
 > [!TIP]
 > Use the "Handled" toggle to prevent or allow hotkey propagation to other applications that might be listening for the same key combination.
@@ -325,16 +319,6 @@ The utility can be uninstalled in several ways depending on how you installed it
   - Find "Explorer Tab Utility" and click "Uninstall"
   - Or use Control Panel > Programs and Features
   - Or run the uninstaller directly from the installation directory
-
-- **If you installed via winget**:
-  ```powershell
-  winget uninstall w4po.ExplorerTabUtility
-  ```
-
-- **If you installed via Chocolatey**:
-  ```powershell
-  choco uninstall explorertabutility
-  ```
 
 - **If you used the portable version**: Simply delete the application folder
   - If you enabled the `Add to startup` option, make sure to disable it first before deletion
