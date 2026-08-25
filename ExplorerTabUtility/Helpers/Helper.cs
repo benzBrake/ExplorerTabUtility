@@ -24,6 +24,7 @@ public static class Helper
     private static int _lastCtrlShiftCheckAt;
     private static bool _lastCtrlShiftCheckValue;
     private static int _tabSelectionInProgress;
+    private static readonly ConcurrentDictionary<nint, TabStripBoundsCache> TabStripBounds = new();
     private static readonly Condition ExplorerTabViewCondition = new AndCondition(
         new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Tab),
         new OrCondition(
@@ -353,13 +354,39 @@ public static class Helper
     {
         isTabStrip = false;
 
+        if (!WinApi.GetWindowRect(explorerWindow, out var windowBounds))
+            return false;
+
+        if (TabStripBounds.TryGetValue(explorerWindow, out var cached) &&
+            cached.WindowWidth == windowBounds.Right - windowBounds.Left &&
+            cached.WindowHeight == windowBounds.Bottom - windowBounds.Top)
+        {
+            isTabStrip = IsPointInBounds(cached.RelativeBounds,
+                new Point(point.X - windowBounds.Left, point.Y - windowBounds.Top));
+            return true;
+        }
+
         try
         {
             var root = AutomationElement.FromHandle(explorerWindow);
             foreach (AutomationElement tabView in FindExplorerTabViews(root))
             {
                 var properties = tabView.Current;
-                isTabStrip = IsPointInBounds(properties.BoundingRectangle, point);
+                var bounds = properties.BoundingRectangle;
+                if (bounds.IsEmpty || bounds.Width <= 0 || bounds.Height <= 0)
+                    continue;
+
+                var relativeBounds = new System.Windows.Rect(
+                    bounds.Left - windowBounds.Left,
+                    bounds.Top - windowBounds.Top,
+                    bounds.Width,
+                    bounds.Height);
+                TabStripBounds[explorerWindow] = new TabStripBoundsCache(
+                    windowBounds.Right - windowBounds.Left,
+                    windowBounds.Bottom - windowBounds.Top,
+                    relativeBounds);
+                isTabStrip = IsPointInBounds(relativeBounds,
+                    new Point(point.X - windowBounds.Left, point.Y - windowBounds.Top));
                 return true;
             }
         }
@@ -377,6 +404,13 @@ public static class Helper
         }
 
         return false;
+    }
+
+    private readonly struct TabStripBoundsCache(int windowWidth, int windowHeight, System.Windows.Rect relativeBounds)
+    {
+        public int WindowWidth { get; } = windowWidth;
+        public int WindowHeight { get; } = windowHeight;
+        public System.Windows.Rect RelativeBounds { get; } = relativeBounds;
     }
 
     public static bool TrySelectAdjacentExplorerTab(nint explorerWindow, int direction)
@@ -450,6 +484,23 @@ public static class Helper
         {
             Volatile.Write(ref _tabSelectionInProgress, 0);
         }
+    }
+
+    public static bool TrySendExplorerTabCommand(nint explorerWindow, int direction)
+    {
+        if (direction is not -1 and not 1 || !IsFileExplorerWindow(explorerWindow))
+            return false;
+
+        // Explorer keeps the active tab first in the ShellTabWindowClass Z-order.
+        var activeTab = WinApi.FindWindowEx(explorerWindow, 0, "ShellTabWindowClass", null);
+        if (activeTab == 0)
+            return false;
+
+        var command = direction > 0
+            ? WinApi.EXPLORER_NEXT_TAB_COMMAND
+            : WinApi.EXPLORER_PREVIOUS_TAB_COMMAND;
+
+        return WinApi.PostMessage(activeTab, WinApi.WM_COMMAND, command, 0);
     }
 
     private static AutomationElementCollection FindExplorerTabViews(AutomationElement root)

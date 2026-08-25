@@ -162,6 +162,14 @@ public sealed class HookManager
         if (profile.Delay > 0)
             await Task.Delay(profile.Delay);
 
+        // Deliver Explorer's own tab accelerator as a window command. This stays
+        // inside Explorer and avoids SendInput, so global shortcut hooks cannot
+        // consume or rewrite the keystroke.
+        if (Helper.TrySendExplorerTabCommand(explorerWindow, direction))
+            return;
+
+        // Compatibility fallback for builds where the undocumented command IDs
+        // have changed or the active tab host is not available.
         Helper.TrySelectAdjacentExplorerTab(explorerWindow, direction);
     }
     private static async Task SendTabShortcut(HotKeyProfile profile, nint foregroundWindow, VirtualKey key, bool withShift)

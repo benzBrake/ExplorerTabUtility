@@ -17,6 +17,11 @@ public static class WinApi
 
     public const int WM_COMMAND = 0x111; // Send a command
 
+    // File Explorer's internal tab accelerators (ExplorerFrame.dll, accelerator #256).
+    // These are undocumented and may change in a future Windows build.
+    public const int EXPLORER_NEXT_TAB_COMMAND = 0xA033; // Ctrl+Tab
+    public const int EXPLORER_PREVIOUS_TAB_COMMAND = 0xA031; // Ctrl+Shift+Tab
+
     public const int SW_SHOWNOACTIVATE = 4; // Show window but not activated
 
     public const uint SWP_NOSIZE = 0x0001;
