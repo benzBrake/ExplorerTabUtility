@@ -209,7 +209,7 @@ public static class SettingsManager
 
 internal class AppSettings
 {
-    public bool MouseHook { get; set; }
+    public bool MouseHook { get; set; } = true;
     public bool KeyboardHook { get; set; } = true;
     public bool WindowHook { get; set; } = true;
     public bool ReuseTabs { get; set; } = true;
